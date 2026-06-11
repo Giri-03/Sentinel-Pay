@@ -1,0 +1,83 @@
+=================================================================
+  SentinelPay ? Real-Time Fraud Detection (Hackathon Edition)
+=================================================================
+
+--- Transaction: TXN001 ---
+  Geo Risk       : 0
+  Velocity Risk  : 0
+  Device Risk    : 0
+  Amount Risk    : 0
+  Total Score    : 0
+  Decision       : APPROVE
+  Latency        : 0.497 ms
+
+--- Transaction: TXN002 ---
+  Geo Risk       : 20
+  Velocity Risk  : 0
+  Device Risk    : 15
+  Amount Risk    : 20
+  Total Score    : 55
+  Decision       : BLOCK
+  Latency        : 0.31 ms
+  Reasons        : Impossible travel detected, Device mismatch detected, High amount anomaly
+
+--- Transaction: TXN003 ---
+  Geo Risk       : 0
+  Velocity Risk  : 20
+  Device Risk    : 0
+  Amount Risk    : 0
+  Total Score    : 20
+  Decision       : OTP_REQUIRED
+  Latency        : 0.227 ms
+  Reasons        : Burst transaction pattern
+
+-----------------------------------------------------------------
+  Ledger Integrity Status: VALID  (Ledger integrity verified ? 3 entries OK)
+-----------------------------------------------------------------
+
+=================================================================
+  CHAOS MODE - 20 High-Risk Transactions
+=================================================================
+  CHAOS_001  |  Score:  20  |  OTP_REQUIRED          |  0.226 ms
+  CHAOS_002  |  Score:  75  |  BLOCK                 |  0.534 ms
+  CHAOS_003  |  Score:  90  |  BLOCK                 |  0.190 ms
+  CHAOS_004  |  Score:  90  |  BLOCK                 |  0.175 ms
+  CHAOS_005  |  Score:  90  |  BLOCK                 |  0.211 ms
+  CHAOS_006  |  Score:  90  |  BLOCK                 |  0.175 ms
+  CHAOS_007  |  Score:  90  |  BLOCK                 |  0.159 ms
+  CHAOS_008  |  Score:  90  |  BLOCK                 |  0.160 ms
+  CHAOS_009  |  Score:  90  |  BLOCK                 |  0.153 ms
+  CHAOS_010  |  Score:  90  |  BLOCK                 |  0.157 ms
+  CHAOS_011  |  Score:  90  |  BLOCK                 |  0.191 ms
+  CHAOS_012  |  Score:  90  |  BLOCK                 |  0.167 ms
+  CHAOS_013  |  Score:  90  |  BLOCK                 |  0.167 ms
+  CHAOS_014  |  Score:  90  |  BLOCK                 |  0.152 ms
+  CHAOS_015  |  Score:  90  |  BLOCK                 |  0.159 ms
+  CHAOS_016  |  Score:  90  |  BLOCK                 |  0.179 ms
+  CHAOS_017  |  Score:  90  |  BLOCK                 |  0.182 ms
+  CHAOS_018  |  Score:  90  |  BLOCK                 |  0.167 ms
+  CHAOS_019  |  Score:  90  |  BLOCK                 |  0.180 ms
+  CHAOS_020  |  Score:  90  |  BLOCK                 |  0.164 ms
+
+  Chaos Avg Latency : 0.192 ms
+  Chaos Max Latency : 0.534 ms
+  [OK] All transactions processed under 200 ms
+
+-----------------------------------------------------------------
+  Ledger Integrity Status: VALID  (Ledger integrity verified ? 23 entries OK)
+-----------------------------------------------------------------
+
+==================================================
+  PERFORMANCE SUMMARY
+==================================================
+  Total Transactions : 23
+  Average Latency    : 0.212 ms
+  Max Latency        : 0.534 ms
+  Approvals          : 1
+  OTP Required       : 2
+  Blocked            : 20
+  Invalid            : 0
+==================================================
+
+  Simulation complete. Ledger -> ledger/ledger.txt
+=================================================================

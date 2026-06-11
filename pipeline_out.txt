@@ -1,0 +1,108 @@
+﻿[Pipeline] Loading datasets...
+  Transactions : 5,000 rows, cols: ['transaction_id', 'user_id', 'timestamp', 'amount', 'latitude', 'longitude', 'device_id', 'ip_address', 'merchant_category', 'transaction_type', 'payment_channel', 'receiver_user_id', 'receiver_risk_category', 'device_os', 'app_version', 'network_type', 'failed_attempts_last_10_min', 'session_id', 'battery_level', 'is_international_ip']
+  Users        : 500 rows, cols: ['user_id', 'home_latitude', 'home_longitude', 'registered_device_id', 'avg_transaction_amount', 'max_transaction_amount', 'risk_category', 'account_creation_date', 'kyc_status', 'daily_transaction_limit', 'usual_login_time_start', 'usual_login_time_end', 'avg_transactions_per_day', 'registered_city', 'sim_registered', 'account_status', 'last_device_change_date', 'linked_bank_count']
+.\venv\Scripts\python.
+exe : Traceback (most 
+recent call last):
+At line:1 char:1
++ .\venv\Scripts\pytho
+n.exe 
+data_pipeline.py 2>&1 
+| Out-File -FilePath  
+...
++ ~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~
+~~~~~
+    + CategoryInfo    
+          : NotSpeci  
+  fied: (Traceback    
+ (most recent call    
+ last)::String) [    
+], RemoteExceptio    n
+    + FullyQualifiedE 
+   rrorId : NativeCo  
+  mmandError
+ 
+  File "C:\Users\moule
+\.gemini\antigravity\s
+cratch\SentinelPay\dat
+a_pipeline.py", line 
+98, in <module>
+    df = 
+run_pipeline()
+  File "C:\Users\moule
+\.gemini\antigravity\s
+cratch\SentinelPay\dat
+a_pipeline.py", line 
+60, in run_pipeline
+    merged = txn_df.me
+rge(user_df[user_cols]
+, on="user_id", 
+how="left")
+  File "C:\Users\moule
+\.gemini\antigravity\s
+cratch\SentinelPay\ven
+v\Lib\site-packages\pa
+ndas\core\frame.py", 
+line 10859, in merge
+    return merge(
+        self,
+    ...<11 lines>...
+        
+validate=validate,
+    )
+  File "C:\Users\moule
+\.gemini\antigravity\s
+cratch\SentinelPay\ven
+v\Lib\site-packages\pa
+ndas\core\reshape\merg
+e.py", line 170, in 
+merge
+    op = 
+_MergeOperation(
+        left_df,
+    ...<10 lines>...
+        
+validate=validate,
+    )
+  File "C:\Users\moule
+\.gemini\antigravity\s
+cratch\SentinelPay\ven
+v\Lib\site-packages\pa
+ndas\core\reshape\merg
+e.py", line 794, in 
+__init__
+    ) = 
+self._get_merge_keys()
+        
+~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\moule
+\.gemini\antigravity\s
+cratch\SentinelPay\ven
+v\Lib\site-packages\pa
+ndas\core\reshape\merg
+e.py", line 1298, in 
+_get_merge_keys
+    right_keys.append(
+right._get_label_or_le
+vel_values(rk))
+                      
+~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~^^^^
+  File "C:\Users\moule
+\.gemini\antigravity\s
+cratch\SentinelPay\ven
+v\Lib\site-packages\pa
+ndas\core\generic.py",
+ line 1928, in _get_la
+bel_or_level_values
+    raise ValueError(
+        f"The 
+{label_axis_name} 
+label '{key}' is not u
+nique.{multi_message}"
+    )
+ValueError: The 
+column label 
+'user_id' is not 
+unique.
