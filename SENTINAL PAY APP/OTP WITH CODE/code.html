@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html class="dark" lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>SentinelPay | OTP Verification</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap"
+        rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+        rel="stylesheet" />
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#13daec",
+                        "background-dark": "#102022",
+                        "charcoal": "#1a1a1a"
+                    },
+                    fontFamily: {
+                        "display": ["Manrope", "sans-serif"],
+                        "mono": ["JetBrains Mono", "monospace"]
+                    }
+                },
+            },
+        }
+    </script>
+    <style type="text/tailwindcss">
+        body { font-family: 'Manrope', sans-serif; }
+  input::-webkit-outer-spin-button,
+  input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+  input[type=number] { -moz-appearance: textfield; }
+
+  /* Captcha box */
+  .captcha-box {
+    position: relative;
+    background: repeating-linear-gradient(
+      45deg, #152224, #152224 8px, #0d191b 8px, #0d191b 16px
+    );
+    border: 2px dashed #4b6b6e;
+    border-radius: 8px;
+    overflow: hidden;
+    user-select: none;
+    letter-spacing: 0.5em;
+  }
+  .captcha-box::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: repeating-linear-gradient(
+      -30deg, transparent, transparent 12px, rgba(255,255,255,.03) 12px, rgba(255,255,255,.03) 13px
+    );
+  }
+  .captcha-noise-line {
+    position: absolute; left: 0; width: 100%; height: 1px;
+    background: rgba(19,218,236,.25); transform-origin: left;
+  }
+</style>
+</head>
+
+<body class="bg-background-dark text-slate-100 min-h-screen flex items-center justify-center font-display p-6">
+
+    <!-- Session helpers (must be first) -->
+    <script>
+        function getUser() { return localStorage.getItem("sentinal_user"); }
+        function logoutUser() {
+            localStorage.removeItem("sentinal_user");
+            window.location.href = "../LOGIN IN USER/code.html";
+        }
+        function checkLogin() {
+            if (!getUser()) window.location.href = "../LOGIN IN USER/code.html";
+        }
+        checkLogin(); // Redirect if not logged in
+    </script>
+
+    <div class="w-full max-w-md">
+        <div class="bg-white/5 border border-white/10 rounded-2xl p-8 md:p-10 shadow-2xl backdrop-blur-sm">
+
+            <!-- Header -->
+            <div class="flex flex-col items-center text-center mb-8">
+                <div
+                    class="w-12 h-12 bg-primary rounded-lg flex items-center justify-center text-background-dark mb-6 shadow-lg shadow-primary/20">
+                    <span class="material-symbols-outlined font-bold text-2xl">shield_person</span>
+                </div>
+                <h1 class="text-2xl font-extrabold text-white tracking-tight mb-1">OTP Verification</h1>
+                <p class="text-slate-400 text-sm">Read the captcha below and enter the code above.</p>
+                <p id="phone-display" class="mt-1 text-primary text-sm font-mono font-semibold"></p>
+            </div>
+
+            <!-- OTP 6-box input -->
+            <div class="mb-6">
+                <label
+                    class="block text-[10px] uppercase tracking-[0.2em] font-bold text-slate-500 mb-3 text-center">Verification
+                    Code</label>
+                <div class="grid grid-cols-6 gap-2 mb-4" id="otp-grid">
+                    <input
+                        class="otp-digit w-full h-12 text-center text-xl font-bold bg-white/5 border border-white/10 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition-all outline-none"
+                        maxlength="1" placeholder="•" type="text" inputmode="numeric" />
+                    <input
+                        class="otp-digit w-full h-12 text-center text-xl font-bold bg-white/5 border border-white/10 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition-all outline-none"
+                        maxlength="1" placeholder="•" type="text" inputmode="numeric" />
+                    <input
+                        class="otp-digit w-full h-12 text-center text-xl font-bold bg-white/5 border border-white/10 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition-all outline-none"
+                        maxlength="1" placeholder="•" type="text" inputmode="numeric" />
+                    <input
+                        class="otp-digit w-full h-12 text-center text-xl font-bold bg-white/5 border border-white/10 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition-all outline-none"
+                        maxlength="1" placeholder="•" type="text" inputmode="numeric" />
+                    <input
+                        class="otp-digit w-full h-12 text-center text-xl font-bold bg-white/5 border border-white/10 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition-all outline-none"
+                        maxlength="1" placeholder="•" type="text" inputmode="numeric" />
+                    <input
+                        class="otp-digit w-full h-12 text-center text-xl font-bold bg-white/5 border border-white/10 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition-all outline-none"
+                        maxlength="1" placeholder="•" type="text" inputmode="numeric" />
+                </div>
+
+                <!-- Timer + resend -->
+                <div class="flex items-center justify-between text-xs font-mono text-slate-500">
+                    <span id="timer-label">Resend available in <span id="timer-count"
+                            class="text-primary">00:60</span></span>
+                    <button id="resend-btn" onclick="refreshOtp()"
+                        class="text-primary hover:underline font-semibold hidden">Resend OTP</button>
+                </div>
+            </div>
+
+            <!-- Captcha display -->
+            <div class="mb-8">
+                <p class="text-[10px] uppercase tracking-[0.2em] font-bold text-slate-500 mb-3">🔑 Your OTP Captcha</p>
+                <div class="captcha-box h-20 flex items-center justify-center relative" id="captcha-wrap">
+                    <div class="captcha-noise-line" style="top:30%; transform:rotate(-1.5deg)"></div>
+                    <div class="captcha-noise-line" style="top:65%; transform:rotate(2deg)"></div>
+                    <div id="captcha-digits" class="flex gap-3 relative z-10">
+                        <!-- digits injected by JS -->
+                    </div>
+                </div>
+                <p class="text-[11px] text-slate-400 italic text-center mt-2">Enter the code shown above in the fields.
+                </p>
+            </div>
+
+            <!-- Error msg -->
+            <p id="err-msg" class="text-red-400 text-xs text-center mb-4 hidden">❌ Incorrect OTP. Please try again.</p>
+            <p id="exp-msg" class="text-amber-400 text-xs text-center mb-4 hidden">⚠️ OTP expired. Click Resend.</p>
+            <p id="max-msg" class="text-red-500 text-xs text-center mb-4 hidden">🚫 Too many attempts. Please resend.
+            </p>
+
+            <!-- Verify button -->
+            <button onclick="verifyOtp()"
+                class="w-full py-4 bg-primary text-background-dark font-bold rounded-lg hover:opacity-90 transition-all shadow-lg shadow-primary/20">
+                Verify & Login
+            </button>
+        </div>
+
+        <p class="text-center mt-8 text-slate-500 text-xs font-medium">
+            <a href="../LOGIN IN USER/code.html" class="text-primary hover:underline">← Back to Login</a>
+        </p>
+    </div>
+
+    <script>
+        /* ── State ─────────────────────────────────────────────── */
+        let generatedOtp = "";
+        let expiresAt = 0;
+        let attempts = 0;
+        const MAX_ATTEMPTS = 3;
+        const OTP_TTL = 60; // seconds
+        let timerInterval;
+
+        /* ── Boot ──────────────────────────────────────────────── */
+        window.onload = function () {
+            const user = getUser();
+            document.getElementById("phone-display").textContent = "Sending to: " + user;
+            generateAndShowOtp();
+            wireInputs();
+        };
+
+        /* ── OTP generation ────────────────────────────────────── */
+        function generateOtp() {
+            return String(Math.floor(100000 + Math.random() * 900000));
+        }
+
+        function generateAndShowOtp() {
+            generatedOtp = generateOtp();
+            expiresAt = Date.now() + OTP_TTL * 1000;
+            attempts = 0;
+            clearMessages();
+            renderCaptcha(generatedOtp);
+            startTimer();
+        }
+
+        function refreshOtp() {
+            document.getElementById("resend-btn").classList.add("hidden");
+            document.getElementById("timer-label").classList.remove("hidden");
+            generateAndShowOtp();
+            clearInputs();
+        }
+
+        /* ── Captcha renderer ──────────────────────────────────── */
+        const ROTATIONS = [-8, 6, -4, 9, -7, 5];
+        const TRANSLATES = [2, -3, 1, -2, 3, -1];
+
+        function renderCaptcha(otp) {
+            const container = document.getElementById("captcha-digits");
+            container.innerHTML = "";
+            [...otp].forEach((ch, i) => {
+                const span = document.createElement("span");
+                span.textContent = ch;
+                span.className = "text-4xl font-black font-mono text-white/80 italic";
+                span.style.transform = `rotate(${ROTATIONS[i]}deg) translateY(${TRANSLATES[i]}px)`;
+                span.style.display = "inline-block";
+                span.style.textShadow = "1px 2px 4px rgba(0,0,0,0.7)";
+                container.appendChild(span);
+            });
+        }
+
+        /* ── Timer ─────────────────────────────────────────────── */
+        function startTimer() {
+            clearInterval(timerInterval);
+            timerInterval = setInterval(() => {
+                const secs = Math.max(0, Math.round((expiresAt - Date.now()) / 1000));
+                const mm = String(Math.floor(secs / 60)).padStart(2, "0");
+                const ss = String(secs % 60).padStart(2, "0");
+                document.getElementById("timer-count").textContent = `${mm}:${ss}`;
+
+                if (secs <= 0) {
+                    clearInterval(timerInterval);
+                    document.getElementById("timer-label").classList.add("hidden");
+                    document.getElementById("resend-btn").classList.remove("hidden");
+                    document.getElementById("captcha-digits").innerHTML =
+                        '<span class="text-slate-500 text-base font-mono">— expired —</span>';
+                }
+            }, 500);
+        }
+
+        /* ── OTP verification ──────────────────────────────────── */
+        function verifyOtp() {
+            clearMessages();
+
+            if (Date.now() > expiresAt) {
+                document.getElementById("exp-msg").classList.remove("hidden");
+                return;
+            }
+            if (attempts >= MAX_ATTEMPTS) {
+                document.getElementById("max-msg").classList.remove("hidden");
+                return;
+            }
+
+            const inputs = document.querySelectorAll(".otp-digit");
+            const entered = [...inputs].map(i => i.value).join("").trim();
+
+            if (entered === generatedOtp) {
+                clearInterval(timerInterval);
+                window.location.href = "../DASH WITH USER & LOGOUT/code.html";
+            } else {
+                attempts++;
+                if (attempts >= MAX_ATTEMPTS) {
+                    document.getElementById("max-msg").classList.remove("hidden");
+                } else {
+                    document.getElementById("err-msg").classList.remove("hidden");
+                    // Shake inputs
+                    inputs.forEach(inp => {
+                        inp.classList.add("border-red-500");
+                        setTimeout(() => inp.classList.remove("border-red-500"), 600);
+                    });
+                }
+            }
+        }
+
+        /* ── Input auto-advance wiring ─────────────────────────── */
+        function wireInputs() {
+            const inputs = document.querySelectorAll(".otp-digit");
+            inputs.forEach((inp, idx) => {
+                inp.addEventListener("input", e => {
+                    const v = e.target.value.replace(/\D/g, "");
+                    e.target.value = v.slice(-1);
+                    if (v && idx < inputs.length - 1) inputs[idx + 1].focus();
+                    if (idx === inputs.length - 1 && v) verifyOtp();
+                });
+                inp.addEventListener("keydown", e => {
+                    if (e.key === "Backspace" && !inp.value && idx > 0) inputs[idx - 1].focus();
+                });
+                inp.addEventListener("paste", e => {
+                    e.preventDefault();
+                    const text = (e.clipboardData || window.clipboardData).getData("text").replace(/\D/g, "");
+                    [...text.slice(0, 6)].forEach((ch, i) => { if (inputs[i]) inputs[i].value = ch; });
+                    inputs[Math.min(text.length, 5)].focus();
+                });
+            });
+        }
+
+        function clearInputs() {
+            document.querySelectorAll(".otp-digit").forEach(i => i.value = "");
+            document.querySelector(".otp-digit").focus();
+        }
+
+        function clearMessages() {
+            ["err-msg", "exp-msg", "max-msg"].forEach(id =>
+                document.getElementById(id).classList.add("hidden")
+            );
+        }
+    </script>
+</body>
+
+</html>

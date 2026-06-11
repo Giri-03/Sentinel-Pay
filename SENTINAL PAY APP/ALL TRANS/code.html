@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html class="dark" lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>SentinelPay | All Transactions</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap"
+        rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+        rel="stylesheet" />
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class", theme: {
+                extend: {
+                    colors: { "primary": "#13daec", "background-dark": "#102022" },
+                    fontFamily: { "display": ["Manrope", "sans-serif"], "mono": ["JetBrains Mono", "monospace"] },
+                }
+            }
+        }
+    </script>
+    <style type="text/tailwindcss">
+        body { font-family: 'Manrope', sans-serif; }
+  .mono { font-family: 'JetBrains Mono', monospace; }
+
+  /* OTP Modal overlay */
+  #otp-overlay {
+    display: none;
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.7);
+    backdrop-filter: blur(6px);
+    z-index: 100;
+    align-items: center;
+    justify-content: center;
+  }
+  #otp-overlay.active { display: flex; }
+
+  /* Captcha box */
+  .captcha-wrap {
+    background: repeating-linear-gradient(45deg,#0d191b,#0d191b 8px,#111f22 8px,#111f22 16px);
+    border: 2px dashed #4b6b6e;
+    border-radius: 8px;
+    user-select: none;
+    overflow: hidden;
+    position: relative;
+  }
+  .captcha-wrap::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: repeating-linear-gradient(-30deg,transparent,transparent 12px,rgba(255,255,255,.03) 12px,rgba(255,255,255,.03) 13px);
+  }
+</style>
+</head>
+
+<body class="bg-background-dark text-slate-100 min-h-screen font-display">
+
+    <script>
+        function getUser() { return localStorage.getItem("sentinal_user"); }
+        function logoutUser() { localStorage.removeItem("sentinal_user"); window.location.href = "../LOGIN IN USER/code.html"; }
+        function checkLogin() { if (!getUser()) window.location.href = "../LOGIN IN USER/code.html"; }
+        checkLogin();
+    </script>
+
+    <!-- Header -->
+    <header class="border-b border-white/10 bg-white/5 backdrop-blur-md sticky top-0 z-50">
+        <div class="max-w-[1440px] mx-auto px-6 h-16 flex items-center justify-between">
+            <div class="flex items-center gap-8">
+                <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 bg-primary rounded flex items-center justify-center text-[#102022]">
+                        <span class="material-symbols-outlined font-bold">shield_with_heart</span>
+                    </div>
+                    <h1 class="text-xl font-extrabold tracking-tight">SentinelPay</h1>
+                </div>
+                <nav class="hidden md:flex items-center gap-6 text-sm font-medium">
+                    <a href="../DASH WITH USER & LOGOUT/code.html"
+                        class="text-slate-400 hover:text-primary transition-colors">Dashboard</a>
+                    <span class="text-primary font-semibold">All Transactions</span>
+                    <a href="../TRANS DETAILS/code.html"
+                        class="text-slate-400 hover:text-primary transition-colors">Trans Details</a>
+                    <a href="../TRANS CHART/code.html" class="text-slate-400 hover:text-primary transition-colors">Trans
+                        Chart</a>
+                </nav>
+            </div>
+            <div class="flex items-center gap-3">
+                <span class="text-sm mono text-slate-300" id="userDisplay"></span>
+                <button onclick="logoutUser()"
+                    class="flex items-center gap-1 px-3 py-1.5 bg-red-500/10 border border-red-500/20 text-red-400 rounded-lg text-xs font-semibold hover:bg-red-500/20 transition-all">
+                    <span class="material-symbols-outlined text-sm">logout</span> Logout
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main -->
+    <main class="max-w-[1440px] mx-auto px-6 py-8">
+        <div class="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
+            <div>
+                <h2 class="text-3xl font-extrabold tracking-tight flex items-center gap-3">
+                    All Transactions
+                    <span
+                        class="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 text-[10px] font-bold uppercase border border-emerald-500/20">
+                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>Live
+                    </span>
+                </h2>
+                <p class="text-slate-400 mt-1">Historical log with real-time risk filtering. High-risk transactions
+                    require OTP.</p>
+            </div>
+            <!-- Transaction form -->
+            <div class="flex items-center gap-3">
+                <div class="flex items-center gap-2 bg-white/5 border border-white/10 rounded-xl px-4 py-2">
+                    <span class="text-xs text-slate-400 font-semibold">Simulate Amount:</span>
+                    <input type="number" id="sim-amount" value="1000" min="1" placeholder="₹ Amount"
+                        class="bg-transparent text-white font-bold w-28 outline-none text-sm mono" />
+                    <button onclick="processTransaction()"
+                        class="px-3 py-1.5 bg-primary text-[#102022] rounded-lg text-xs font-bold hover:opacity-90 transition-all">
+                        Proceed →
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Status -->
+        <div id="txn-status" class="hidden mb-4 p-3 rounded-lg text-sm font-semibold"></div>
+
+        <!-- Table -->
+        <div class="bg-white/5 border border-white/10 rounded-xl overflow-hidden shadow-sm">
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse min-w-[900px]">
+                    <thead>
+                        <tr class="bg-white/5 border-b border-white/10">
+                            <th class="px-6 py-4 text-[11px] font-bold text-slate-400 uppercase tracking-widest">
+                                Transaction ID</th>
+                            <th class="px-6 py-4 text-[11px] font-bold text-slate-400 uppercase tracking-widest">User
+                            </th>
+                            <th class="px-6 py-4 text-[11px] font-bold text-slate-400 uppercase tracking-widest">Amount
+                            </th>
+                            <th
+                                class="px-6 py-4 text-[11px] font-bold text-slate-400 uppercase tracking-widest text-center">
+                                Status</th>
+                            <th
+                                class="px-6 py-4 text-[11px] font-bold text-slate-400 uppercase tracking-widest text-center">
+                                Risk</th>
+                            <th class="px-6 py-4 text-[11px] font-bold text-slate-400 uppercase tracking-widest">
+                                Timestamp</th>
+                            <th
+                                class="px-6 py-4 text-[11px] font-bold text-slate-400 uppercase tracking-widest text-right">
+                                Latency</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-white/5">
+                        <tr class="hover:bg-white/[0.02] transition-colors cursor-pointer"
+                            onclick="location.href='../TRANS DETAILS/code.html'">
+                            <td class="px-6 py-4 mono text-sm text-slate-300">TXN-9982-A21</td>
+                            <td class="px-6 py-4 text-sm">user_8829_fk</td>
+                            <td class="px-6 py-4 text-sm font-bold">$1,240.00</td>
+                            <td class="px-6 py-4 text-center"><span
+                                    class="px-2.5 py-1 text-[11px] font-bold rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">APPROVED</span>
+                            </td>
+                            <td class="px-6 py-4">
+                                <div class="flex items-center justify-center gap-2">
+                                    <div class="w-16 h-1.5 bg-white/10 rounded-full overflow-hidden">
+                                        <div class="h-full bg-emerald-400" style="width:12%"></div>
+                                    </div><span class="text-xs font-bold">12</span>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 text-sm text-slate-400">Feb 21, 14:20:01</td>
+                            <td class="px-6 py-4 text-sm text-slate-400 text-right mono">42ms</td>
+                        </tr>
+                        <tr class="hover:bg-white/[0.02] transition-colors cursor-pointer"
+                            onclick="location.href='../TRANS DETAILS/code.html'">
+                            <td class="px-6 py-4 mono text-sm text-slate-300">TXN-8821-B44</td>
+                            <td class="px-6 py-4 text-sm">user_1102_gh</td>
+                            <td class="px-6 py-4 text-sm font-bold">$3,500.00</td>
+                            <td class="px-6 py-4 text-center"><span
+                                    class="px-2.5 py-1 text-[11px] font-bold rounded bg-amber-500/10 text-amber-400 border border-amber-500/20">OTP
+                                    REQ</span></td>
+                            <td class="px-6 py-4">
+                                <div class="flex items-center justify-center gap-2">
+                                    <div class="w-16 h-1.5 bg-white/10 rounded-full overflow-hidden">
+                                        <div class="h-full bg-amber-400" style="width:64%"></div>
+                                    </div><span class="text-xs font-bold">64</span>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 text-sm text-slate-400">Feb 21, 14:18:55</td>
+                            <td class="px-6 py-4 text-sm text-slate-400 text-right mono">118ms</td>
+                        </tr>
+                        <tr class="hover:bg-white/[0.02] transition-colors cursor-pointer"
+                            onclick="location.href='../TRANS DETAILS/code.html'">
+                            <td class="px-6 py-4 mono text-sm text-slate-300">TXN-7734-X09</td>
+                            <td class="px-6 py-4 text-sm">user_9921_pt</td>
+                            <td class="px-6 py-4 text-sm font-bold">$12.50</td>
+                            <td class="px-6 py-4 text-center"><span
+                                    class="px-2.5 py-1 text-[11px] font-bold rounded bg-red-500/10 text-red-400 border border-red-500/20">BLOCKED</span>
+                            </td>
+                            <td class="px-6 py-4">
+                                <div class="flex items-center justify-center gap-2">
+                                    <div class="w-16 h-1.5 bg-white/10 rounded-full overflow-hidden">
+                                        <div class="h-full bg-red-400" style="width:91%"></div>
+                                    </div><span class="text-xs font-bold">91</span>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 text-sm text-slate-400">Feb 21, 14:15:20</td>
+                            <td class="px-6 py-4 text-sm text-slate-400 text-right mono">29ms</td>
+                        </tr>
+                        <tr class="hover:bg-white/[0.02] transition-colors cursor-pointer"
+                            onclick="location.href='../TRANS DETAILS/code.html'">
+                            <td class="px-6 py-4 mono text-sm text-slate-300">TXN-5509-R11</td>
+                            <td class="px-6 py-4 text-sm">user_2218_kk</td>
+                            <td class="px-6 py-4 text-sm font-bold">$21,400.00</td>
+                            <td class="px-6 py-4 text-center"><span
+                                    class="px-2.5 py-1 text-[11px] font-bold rounded bg-amber-500/10 text-amber-400 border border-amber-500/20">OTP
+                                    REQ</span></td>
+                            <td class="px-6 py-4">
+                                <div class="flex items-center justify-center gap-2">
+                                    <div class="w-16 h-1.5 bg-white/10 rounded-full overflow-hidden">
+                                        <div class="h-full bg-amber-400" style="width:52%"></div>
+                                    </div><span class="text-xs font-bold">52</span>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 text-sm text-slate-400">Feb 21, 14:10:02</td>
+                            <td class="px-6 py-4 text-sm text-slate-400 text-right mono">204ms</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <!-- ── OTP Modal Overlay ─────────────────────────────────────── -->
+    <div id="otp-overlay" role="dialog" aria-modal="true">
+        <div class="bg-[#0d1b1e] border border-white/10 rounded-2xl p-8 w-full max-w-md mx-4 shadow-2xl">
+            <div class="flex items-center gap-3 mb-6">
+                <div class="w-10 h-10 bg-amber-500/20 rounded-lg flex items-center justify-center">
+                    <span class="material-symbols-outlined text-amber-400">lock</span>
+                </div>
+                <div>
+                    <h3 class="font-bold text-white text-lg">High-Risk Transaction</h3>
+                    <p class="text-slate-400 text-xs">OTP required to proceed</p>
+                </div>
+            </div>
+            <p class="text-sm text-slate-300 mb-1">Transaction Amount: <span id="modal-amount"
+                    class="text-primary font-bold mono"></span></p>
+            <p class="text-xs text-slate-400 mb-6">Risk score exceeds threshold. Verify your identity to approve.</p>
+
+            <!-- 6-box input -->
+            <label class="block text-[10px] uppercase tracking-widest font-bold text-slate-500 mb-2">Enter OTP</label>
+            <div class="grid grid-cols-6 gap-2 mb-4" id="txn-otp-grid">
+                <input
+                    class="txn-otp-digit w-full h-11 text-center text-lg font-bold bg-white/5 border border-white/10 rounded-lg focus:ring-2 focus:ring-primary outline-none"
+                    maxlength="1" type="text" inputmode="numeric" />
+                <input
+                    class="txn-otp-digit w-full h-11 text-center text-lg font-bold bg-white/5 border border-white/10 rounded-lg focus:ring-2 focus:ring-primary outline-none"
+                    maxlength="1" type="text" inputmode="numeric" />
+                <input
+                    class="txn-otp-digit w-full h-11 text-center text-lg font-bold bg-white/5 border border-white/10 rounded-lg focus:ring-2 focus:ring-primary outline-none"
+                    maxlength="1" type="text" inputmode="numeric" />
+                <input
+                    class="txn-otp-digit w-full h-11 text-center text-lg font-bold bg-white/5 border border-white/10 rounded-lg focus:ring-2 focus:ring-primary outline-none"
+                    maxlength="1" type="text" inputmode="numeric" />
+                <input
+                    class="txn-otp-digit w-full h-11 text-center text-lg font-bold bg-white/5 border border-white/10 rounded-lg focus:ring-2 focus:ring-primary outline-none"
+                    maxlength="1" type="text" inputmode="numeric" />
+                <input
+                    class="txn-otp-digit w-full h-11 text-center text-lg font-bold bg-white/5 border border-white/10 rounded-lg focus:ring-2 focus:ring-primary outline-none"
+                    maxlength="1" type="text" inputmode="numeric" />
+            </div>
+
+            <!-- Captcha -->
+            <p class="text-[10px] uppercase tracking-widest font-bold text-slate-500 mb-2">🔑 OTP Captcha — read and
+                enter above</p>
+            <div class="captcha-wrap h-16 flex items-center justify-center mb-1" id="txn-captcha-wrap">
+                <div id="txn-captcha-digits" class="flex gap-3 relative z-10"></div>
+            </div>
+            <!-- Timer -->
+            <p class="text-xs text-slate-500 mono text-center mb-4">Expires in <span id="txn-timer"
+                    class="text-primary">01:00</span></p>
+
+            <p id="txn-err" class="text-red-400 text-xs text-center mb-3 hidden">❌ Incorrect OTP. Try again.</p>
+            <p id="txn-max" class="text-red-500 text-xs text-center mb-3 hidden">🚫 Too many attempts. Transaction
+                blocked.</p>
+
+            <div class="flex gap-3">
+                <button onclick="verifyTxnOtp()"
+                    class="flex-1 py-3 bg-primary text-[#102022] font-bold rounded-lg hover:opacity-90 transition-all text-sm">
+                    Verify & Approve
+                </button>
+                <button onclick="closeOtpModal()"
+                    class="px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-sm hover:bg-white/10 transition-all">
+                    Cancel
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        window.onload = () => { document.getElementById("userDisplay").textContent = getUser() || ""; };
+
+        /* ── Transaction Risk Logic ─────────────────────────────── */
+        let txnOtp = ""; let txnExpiresAt = 0; let txnAttempts = 0; let txnTimerInterval;
+        const HIGH_RISK_THRESHOLD = 5000;
+        const ROTATIONS = [-8, 6, -4, 9, -7, 5];
+        const TRANSLATES = [2, -3, 1, -2, 3, -1];
+
+        function processTransaction() {
+            const amount = parseFloat(document.getElementById("sim-amount").value);
+            const statusEl = document.getElementById("txn-status");
+
+            if (!amount || amount <= 0) return;
+
+            if (amount > HIGH_RISK_THRESHOLD) {
+                statusEl.className = "mb-4 p-3 rounded-lg text-sm font-semibold bg-amber-500/10 border border-amber-500/20 text-amber-300";
+                statusEl.textContent = `⚠️ High-risk transaction of ₹${amount.toLocaleString()} detected. OTP verification required.`;
+                statusEl.classList.remove("hidden");
+                openOtpModal(amount);
+            } else {
+                statusEl.className = "mb-4 p-3 rounded-lg text-sm font-semibold bg-emerald-500/10 border border-emerald-500/20 text-emerald-300";
+                statusEl.textContent = `✅ Transaction of ₹${amount.toLocaleString()} approved. Risk within limit.`;
+                statusEl.classList.remove("hidden");
+            }
+        }
+
+        function openOtpModal(amount) {
+            document.getElementById("modal-amount").textContent = `₹${amount.toLocaleString()}`;
+            txnOtp = String(Math.floor(100000 + Math.random() * 900000));
+            txnExpiresAt = Date.now() + 60000;
+            txnAttempts = 0;
+            clearTxnMessages();
+            renderTxnCaptcha(txnOtp);
+            startTxnTimer();
+            wireTxnInputs();
+            clearTxnInputs();
+            document.getElementById("otp-overlay").classList.add("active");
+            document.querySelector(".txn-otp-digit").focus();
+        }
+
+        function closeOtpModal() {
+            clearInterval(txnTimerInterval);
+            document.getElementById("otp-overlay").classList.remove("active");
+        }
+
+        function renderTxnCaptcha(otp) {
+            const wrap = document.getElementById("txn-captcha-digits");
+            wrap.innerHTML = "";
+            [...otp].forEach((ch, i) => {
+                const s = document.createElement("span");
+                s.textContent = ch;
+                s.className = "text-3xl font-black mono text-white/80 italic";
+                s.style.transform = `rotate(${ROTATIONS[i]}deg) translateY(${TRANSLATES[i]}px)`;
+                s.style.display = "inline-block";
+                s.style.textShadow = "1px 2px 4px rgba(0,0,0,.7)";
+                wrap.appendChild(s);
+            });
+        }
+
+        function startTxnTimer() {
+            clearInterval(txnTimerInterval);
+            txnTimerInterval = setInterval(() => {
+                const secs = Math.max(0, Math.round((txnExpiresAt - Date.now()) / 1000));
+                const mm = String(Math.floor(secs / 60)).padStart(2, "0");
+                const ss = String(secs % 60).padStart(2, "0");
+                document.getElementById("txn-timer").textContent = `${mm}:${ss}`;
+                if (secs <= 0) {
+                    clearInterval(txnTimerInterval);
+                    document.getElementById("txn-captcha-digits").innerHTML = '<span class="text-slate-500 text-sm mono">— expired —</span>';
+                }
+            }, 500);
+        }
+
+        function verifyTxnOtp() {
+            clearTxnMessages();
+            if (Date.now() > txnExpiresAt) { showTxnMsg("txn-err", "OTP expired. Close and retry."); return; }
+            if (txnAttempts >= 3) { document.getElementById("txn-max").classList.remove("hidden"); return; }
+
+            const inputs = document.querySelectorAll(".txn-otp-digit");
+            const entered = [...inputs].map(i => i.value).join("").trim();
+
+            if (entered === txnOtp) {
+                clearInterval(txnTimerInterval);
+                closeOtpModal();
+                const statusEl = document.getElementById("txn-status");
+                statusEl.className = "mb-4 p-3 rounded-lg text-sm font-semibold bg-emerald-500/10 border border-emerald-500/20 text-emerald-300";
+                statusEl.textContent = "✅ OTP verified. High-risk transaction approved.";
+            } else {
+                txnAttempts++;
+                txnAttempts >= 3
+                    ? document.getElementById("txn-max").classList.remove("hidden")
+                    : document.getElementById("txn-err").classList.remove("hidden");
+            }
+        }
+
+        function wireTxnInputs() {
+            const inputs = document.querySelectorAll(".txn-otp-digit");
+            inputs.forEach(i => i.replaceWith(i.cloneNode(true))); // detach old listeners
+            document.querySelectorAll(".txn-otp-digit").forEach((inp, idx, all) => {
+                inp.addEventListener("input", e => {
+                    e.target.value = e.target.value.replace(/\D/g, "").slice(-1);
+                    if (e.target.value && idx < all.length - 1) all[idx + 1].focus();
+                    if (idx === all.length - 1 && e.target.value) verifyTxnOtp();
+                });
+                inp.addEventListener("keydown", e => { if (e.key === "Backspace" && !inp.value && idx > 0) all[idx - 1].focus(); });
+            });
+        }
+
+        function clearTxnInputs() { document.querySelectorAll(".txn-otp-digit").forEach(i => i.value = ""); }
+        function clearTxnMessages() { ["txn-err", "txn-max"].forEach(id => document.getElementById(id).classList.add("hidden")); }
+        function showTxnMsg(id, msg) {
+            const el = document.getElementById(id);
+            el.textContent = msg;
+            el.classList.remove("hidden");
+        }
+    </script>
+</body>
+
+</html>

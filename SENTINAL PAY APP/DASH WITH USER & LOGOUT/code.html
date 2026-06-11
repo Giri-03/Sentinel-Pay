@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html class="dark" lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>SentinelPay | Dashboard</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap"
+        rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+        rel="stylesheet" />
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: { "primary": "#136dec", "background-dark": "#101822", "charcoal-menu": "#1a1f26", "teal-accent": "#2dd4bf", "success-emerald": "#10b981", "warning-amber": "#f59e0b", "danger-crimson": "#ef4444" },
+                    fontFamily: { "display": ["Manrope", "sans-serif"], "mono": ["JetBrains Mono", "monospace"] },
+                    borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" },
+                }
+            },
+        }
+    </script>
+    <style type="text/tailwindcss">
+        body { font-family: 'Manrope', sans-serif; }
+  .mono-text { font-family: 'JetBrains Mono', monospace; }
+  ::-webkit-scrollbar { width:8px; }
+  ::-webkit-scrollbar-track { background:#101822; }
+  ::-webkit-scrollbar-thumb { background:#1e293b; border-radius:4px; }
+</style>
+</head>
+
+<body class="bg-background-dark text-slate-100 min-h-screen flex flex-col">
+
+    <!-- Session helpers -->
+    <script>
+        function getUser() { return localStorage.getItem("sentinal_user"); }
+        function setUser(p) { localStorage.setItem("sentinal_user", p); }
+        function logoutUser() { localStorage.removeItem("sentinal_user"); window.location.href = "../LOGIN IN USER/code.html"; }
+        function checkLogin() { if (!getUser()) window.location.href = "../LOGIN IN USER/code.html"; }
+        checkLogin();
+    </script>
+
+    <!-- Header -->
+    <header
+        class="sticky top-0 z-50 flex items-center justify-between border-b border-slate-800 bg-background-dark/90 backdrop-blur-md px-6 py-3">
+        <div class="flex items-center gap-6">
+            <div class="flex items-center gap-2">
+                <div class="w-8 h-8 bg-primary rounded flex items-center justify-center text-white">
+                    <span class="material-symbols-outlined text-xl">shield_with_heart</span>
+                </div>
+                <h1 class="text-lg font-bold tracking-tight">SentinelPay <span
+                        class="hidden md:inline font-normal text-slate-400">— Analyst Dashboard</span></h1>
+            </div>
+            <nav class="hidden md:flex items-center gap-5 text-sm font-medium">
+                <span class="text-primary font-semibold">Dashboard</span>
+                <a href="../ALL TRANS/code.html" class="text-slate-400 hover:text-primary transition-colors">All
+                    Transactions</a>
+                <a href="../TRANS DETAILS/code.html" class="text-slate-400 hover:text-primary transition-colors">Trans
+                    Details</a>
+                <a href="../TRANS CHART/code.html" class="text-slate-400 hover:text-primary transition-colors">Trans
+                    Chart</a>
+            </nav>
+        </div>
+        <div class="flex items-center gap-3">
+            <div class="flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20">
+                <span class="material-symbols-outlined text-emerald-400 text-sm">verified_user</span>
+                <span class="text-xs font-semibold text-emerald-400 uppercase tracking-wider">Ledger: VALID</span>
+            </div>
+            <div class="flex items-center gap-2 pl-3 border-l border-slate-700">
+                <span class="text-sm font-medium mono-text text-slate-300" id="userDisplay">—</span>
+                <button onclick="logoutUser()"
+                    class="flex items-center gap-1 px-3 py-1.5 bg-red-500/10 border border-red-500/20 text-red-400 rounded-lg text-xs font-semibold hover:bg-red-500/20 transition-all">
+                    <span class="material-symbols-outlined text-sm">logout</span> Logout
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main -->
+    <main class="flex-1 flex flex-col p-6 gap-6 max-w-[1600px] mx-auto w-full mb-6">
+
+        <!-- Welcome banner -->
+        <div class="p-4 bg-primary/5 border border-primary/20 rounded-xl flex items-center justify-between">
+            <div>
+                <p class="text-xs text-slate-400 uppercase tracking-widest font-semibold mb-0.5">Logged in as</p>
+                <p id="welcomeUser" class="text-primary font-bold text-lg mono-text"></p>
+            </div>
+            <span class="material-symbols-outlined text-primary text-4xl">manage_accounts</span>
+        </div>
+
+        <!-- Metric cards -->
+        <section class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+            <div class="p-4 bg-slate-900/50 rounded-xl border border-slate-800 hover:border-primary/30 transition-all">
+                <p class="text-xs font-medium text-slate-400 uppercase tracking-widest mb-1">Total Txns</p>
+                <h3 class="text-2xl font-bold">1,240,582</h3>
+                <div class="flex items-center gap-1 mt-2 text-xs font-medium text-emerald-400">
+                    <span class="material-symbols-outlined text-sm">trending_up</span><span>+2.4%</span>
+                </div>
+            </div>
+            <div class="p-4 bg-slate-900/50 rounded-xl border border-slate-800 hover:border-primary/30 transition-all">
+                <p class="text-xs font-medium text-slate-400 uppercase tracking-widest mb-1">Avg Latency</p>
+                <h3 class="text-2xl font-bold mono-text">42ms</h3>
+                <div class="flex items-center gap-1 mt-2 text-xs text-emerald-400 font-medium">
+                    <span class="material-symbols-outlined text-sm">expand_more</span><span>-1.2ms</span>
+                </div>
+            </div>
+            <div class="p-4 bg-slate-900/50 rounded-xl border border-slate-800 hover:border-primary/30 transition-all">
+                <p class="text-xs font-medium text-slate-400 uppercase tracking-widest mb-1">Max Latency</p>
+                <h3 class="text-2xl font-bold mono-text">118ms</h3>
+                <div class="flex items-center gap-1 mt-2 text-xs text-amber-400 font-medium">
+                    <span class="material-symbols-outlined text-sm">priority_high</span><span>Outlier</span>
+                </div>
+            </div>
+            <div class="p-4 bg-slate-900/50 rounded-xl border border-slate-800 hover:border-primary/30 transition-all">
+                <p class="text-xs font-medium text-slate-400 uppercase tracking-widest mb-1">Approved</p>
+                <h3 class="text-2xl font-bold">98.2%</h3>
+                <div class="h-1.5 w-full bg-slate-800 rounded-full mt-3 overflow-hidden">
+                    <div class="h-full bg-emerald-500" style="width:98.2%"></div>
+                </div>
+            </div>
+            <div class="p-4 bg-slate-900/50 rounded-xl border border-slate-800 hover:border-primary/30 transition-all">
+                <p class="text-xs font-medium text-slate-400 uppercase tracking-widest mb-1">OTP Required</p>
+                <h3 class="text-2xl font-bold">1.5%</h3>
+                <div class="h-1.5 w-full bg-slate-800 rounded-full mt-3 overflow-hidden">
+                    <div class="h-full bg-amber-400" style="width:1.5%"></div>
+                </div>
+            </div>
+            <div class="p-4 bg-slate-900/50 rounded-xl border border-slate-800 hover:border-primary/30 transition-all">
+                <p class="text-xs font-medium text-slate-400 uppercase tracking-widest mb-1">Blocked</p>
+                <h3 class="text-2xl font-bold">0.3%</h3>
+                <div class="h-1.5 w-full bg-slate-800 rounded-full mt-3 overflow-hidden">
+                    <div class="h-full bg-red-500" style="width:0.3%"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Live stream table -->
+        <div class="grid grid-cols-1 lg:grid-cols-4 gap-6 flex-1">
+            <section
+                class="lg:col-span-3 flex flex-col bg-slate-900/50 rounded-xl border border-slate-800 overflow-hidden">
+                <div class="p-4 border-b border-slate-800 flex items-center justify-between bg-slate-800/20">
+                    <div class="flex items-center gap-3">
+                        <span class="material-symbols-outlined text-slate-400">list_alt</span>
+                        <h2 class="font-bold">Live Transaction Stream</h2>
+                    </div>
+                    <span class="flex h-2 w-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                </div>
+                <div class="overflow-x-auto flex-1">
+                    <table class="w-full text-left text-sm border-collapse">
+                        <thead>
+                            <tr class="text-slate-400 border-b border-slate-800">
+                                <th class="px-4 py-3 font-medium">Trace ID</th>
+                                <th class="px-4 py-3 font-medium">Risk Score</th>
+                                <th class="px-4 py-3 font-medium text-center">Decision</th>
+                                <th class="px-4 py-3 font-medium text-right">Latency</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-800/50">
+                            <tr class="hover:bg-slate-800/30 transition-colors cursor-pointer"
+                                onclick="location.href='../TRANS DETAILS/code.html'">
+                                <td class="px-4 py-4 font-mono text-xs text-primary">TXN_77412_A9B</td>
+                                <td class="px-4 py-4"><span class="font-semibold">12</span> <span
+                                        class="text-[10px] text-slate-500">Very Low</span></td>
+                                <td class="px-4 py-4 text-center"><span
+                                        class="px-2 py-1 rounded text-[10px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">APPROVE</span>
+                                </td>
+                                <td class="px-4 py-4 text-right mono-text text-slate-400">38ms</td>
+                            </tr>
+                            <tr class="hover:bg-slate-800/30 transition-colors cursor-pointer"
+                                onclick="location.href='../TRANS DETAILS/code.html'">
+                                <td class="px-4 py-4 font-mono text-xs text-primary">TXN_88124_F01</td>
+                                <td class="px-4 py-4"><span class="font-semibold text-red-400">84</span> <span
+                                        class="text-[10px] text-red-400/80">Critical</span></td>
+                                <td class="px-4 py-4 text-center"><span
+                                        class="px-2 py-1 rounded text-[10px] font-bold bg-red-500/10 text-red-400 border border-red-500/20">BLOCK</span>
+                                </td>
+                                <td class="px-4 py-4 text-right mono-text text-slate-400">45ms</td>
+                            </tr>
+                            <tr class="hover:bg-slate-800/30 transition-colors cursor-pointer"
+                                onclick="location.href='../TRANS DETAILS/code.html'">
+                                <td class="px-4 py-4 font-mono text-xs text-primary">TXN_99201_X72</td>
+                                <td class="px-4 py-4"><span class="font-semibold text-amber-400">48</span> <span
+                                        class="text-[10px] text-slate-500">Medium</span></td>
+                                <td class="px-4 py-4 text-center"><span
+                                        class="px-2 py-1 rounded text-[10px] font-bold bg-amber-500/10 text-amber-400 border border-amber-500/20">OTP</span>
+                                </td>
+                                <td class="px-4 py-4 text-right mono-text text-slate-400">41ms</td>
+                            </tr>
+                            <tr class="hover:bg-slate-800/30 transition-colors cursor-pointer"
+                                onclick="location.href='../TRANS DETAILS/code.html'">
+                                <td class="px-4 py-4 font-mono text-xs text-primary">TXN_00231_L44</td>
+                                <td class="px-4 py-4"><span class="font-semibold">04</span> <span
+                                        class="text-[10px] text-slate-500">Negligible</span></td>
+                                <td class="px-4 py-4 text-center"><span
+                                        class="px-2 py-1 rounded text-[10px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">APPROVE</span>
+                                </td>
+                                <td class="px-4 py-4 text-right mono-text text-slate-400">36ms</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="p-4 border-t border-slate-800 flex justify-between items-center text-xs text-slate-400">
+                    <span>Showing 4 recent transactions</span>
+                    <a href="../ALL TRANS/code.html" class="text-primary hover:underline font-semibold">View All →</a>
+                </div>
+            </section>
+
+            <!-- Risk analysis -->
+            <section class="flex flex-col gap-4">
+                <div class="bg-slate-900/50 p-5 rounded-xl border border-slate-800 flex-1">
+                    <h2 class="font-bold mb-4 flex items-center gap-2">
+                        <span class="material-symbols-outlined text-teal-accent">analytics</span> Risk Analysis
+                    </h2>
+                    <div class="space-y-5">
+                        <div>
+                            <div class="flex justify-between text-xs font-semibold mb-2"><span
+                                    class="text-slate-400 uppercase">Geographic Anomaly</span><span>32%</span></div>
+                            <div class="h-2 w-full bg-slate-800 rounded-full overflow-hidden">
+                                <div class="h-full bg-teal-accent" style="width:32%"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between text-xs font-semibold mb-2"><span
+                                    class="text-slate-400 uppercase">Txn Velocity</span><span>18%</span></div>
+                            <div class="h-2 w-full bg-slate-800 rounded-full overflow-hidden">
+                                <div class="h-full bg-teal-accent opacity-80" style="width:18%"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between text-xs font-semibold mb-2"><span
+                                    class="text-slate-400 uppercase">Device Fingerprint</span><span>45%</span></div>
+                            <div class="h-2 w-full bg-slate-800 rounded-full overflow-hidden">
+                                <div class="h-full bg-teal-accent opacity-60" style="width:45%"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between text-xs font-semibold mb-2"><span
+                                    class="text-slate-400 uppercase">Amount Deviation</span><span>5%</span></div>
+                            <div class="h-2 w-full bg-slate-800 rounded-full overflow-hidden">
+                                <div class="h-full bg-teal-accent opacity-40" style="width:5%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Quick nav -->
+                <div class="bg-slate-900/50 p-4 rounded-xl border border-slate-800">
+                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-3">Navigate</p>
+                    <div class="flex flex-col gap-2">
+                        <a href="../ALL TRANS/code.html"
+                            class="flex items-center gap-2 px-3 py-2 bg-white/5 hover:bg-primary/10 hover:text-primary rounded-lg text-sm font-medium transition-all">
+                            <span class="material-symbols-outlined text-sm">receipt_long</span> All Transactions
+                        </a>
+                        <a href="../TRANS DETAILS/code.html"
+                            class="flex items-center gap-2 px-3 py-2 bg-white/5 hover:bg-primary/10 hover:text-primary rounded-lg text-sm font-medium transition-all">
+                            <span class="material-symbols-outlined text-sm">info</span> Transaction Details
+                        </a>
+                        <a href="../TRANS CHART/code.html"
+                            class="flex items-center gap-2 px-3 py-2 bg-white/5 hover:bg-primary/10 hover:text-primary rounded-lg text-sm font-medium transition-all">
+                            <span class="material-symbols-outlined text-sm">bar_chart</span> Transaction Chart
+                        </a>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <script>
+        window.onload = function () {
+            const u = getUser() || "Unknown";
+            document.getElementById("userDisplay").textContent = u;
+            document.getElementById("welcomeUser").textContent = u;
+        };
+    </script>
+</body>
+
+</html>
